@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-cost-saver
+  namespace: default
+spec:
+  schedule: "0 22 * * *" # Har raat 10 PM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cost-optimizer-sa
+          containers:
+          - name: kubectl-runner
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/sh
+            - -c
+            - "kubectl scale deployment busy-worker --replicas=0"
+          restartPolicy: OnFailure

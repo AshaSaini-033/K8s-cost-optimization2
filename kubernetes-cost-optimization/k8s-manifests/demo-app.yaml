@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busy-worker
+  labels:
+    app: cost-test
+    env: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: busy-worker
+  template:
+    metadata:
+      labels:
+        app: busy-worker
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
