@@ -6,8 +6,14 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: deployment-scaler-role
+  name: cost-optimizer-role
 rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "delete"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["get", "list"]
 - apiGroups: ["apps"]
   resources: ["deployments", "deployments/scale"]
   verbs: ["get", "list", "patch", "update"]
@@ -21,5 +27,5 @@ subjects:
   name: cost-optimizer-sa
 roleRef:
   kind: Role
-  name: deployment-scaler-role
+  name: cost-optimizer-role
   apiGroup: rbac.authorization.k8s.io
