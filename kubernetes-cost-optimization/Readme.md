@@ -34,7 +34,7 @@ flowchart TD
     A -->|Rejected| E[End / Audit]
     X --> K
     K --> V[Verification]
-    V --> D[(PostgreSQL Audit Log)]
+    V --> D[(MySQL Audit Log)]
     E --> D
 ```
 
@@ -50,7 +50,7 @@ flowchart TD
 - **Risk Policy** is normal Python code, so safety is not decided by the LLM.
 - **Remediation Agent** performs only predefined Kubernetes operations.
 - **Verification** checks whether the action actually helped.
-- **PostgreSQL** stores what happened for auditing.
+- **MySQL** stores what happened for auditing.
 
 ---
 
@@ -86,7 +86,7 @@ sequenceDiagram
     participant R as Risk Policy
     participant M as Remediation
     participant V as Verification
-    participant DB as PostgreSQL
+    participant DB as MySQL
 
     K->>H: Pod status + restart count
     H->>G: CrashLoopBackOff detected
@@ -207,7 +207,7 @@ flowchart TD
     D -->|Yes| C
     D -->|No| E[Stop + Audit]
     C --> F[Verify Result]
-    F --> G[Audit PostgreSQL]
+    F --> G[Audit MySQL]
 ```
 
 The policy only allows known actions such as `restart_pod`, `scale_deployment` and `no_action`.
@@ -216,7 +216,7 @@ If an action is not allowed or is treated as high risk, the workflow does not bl
 
 ---
 
-## 🗄️ PostgreSQL Audit Log
+## 🗄️ MySQL Audit Log
 
 Every processed incident can be recorded in the `incidents` table.
 
@@ -289,7 +289,7 @@ kubernetes-cost-optimization/
 | AI | Claude API |
 | AI tool connection | LangChain |
 | Workflow orchestration | LangGraph |
-| Database / audit | PostgreSQL |
+| Database / audit | MySQL |
 | Scheduling | Kubernetes CronJob |
 | Access control | Kubernetes RBAC |
 
@@ -339,11 +339,11 @@ Copy `.env.example` to `.env` and set your values.
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key
 CLAUDE_MODEL=claude-3-5-haiku-latest
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=self_healing
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=change_me
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_DATABASE=self_healing
+MYSQL_USER=root
+MYSQL_PASSWORD=change_me
 ```
 
 Never commit a real API key to GitHub.
@@ -386,7 +386,7 @@ The basic workflow becomes:
 5. If approval is required, the CLI asks the user
 6. Remediation Agent performs the allowed Kubernetes action
 7. Verification checks the new pod state
-8. PostgreSQL stores the incident and result
+8. MySQL stores the incident and result
 ```
 
 ---
@@ -409,7 +409,7 @@ It is **not** being used to replace Kubernetes, Prometheus or normal Python safe
 
 If asked about the project, the main idea is:
 
-> **I started with a Kubernetes FinOps automation system that used Prometheus metrics and Python to identify underutilized workloads. I extended it with a basic self-healing workflow where health, cost and resource agents collect signals, LangGraph orchestrates the flow, Claude provides a recommendation, a deterministic Python policy checks the risk, and only predefined Kubernetes operations are executed. The result is then verified and stored in PostgreSQL for auditability.**
+> **I started with a Kubernetes FinOps automation system that used Prometheus metrics and Python to identify underutilized workloads. I extended it with a basic self-healing workflow where health, cost and resource agents collect signals, LangGraph orchestrates the flow, Claude provides a recommendation, a deterministic Python policy checks the risk, and only predefined Kubernetes operations are executed. The result is then verified and stored in MySQL for auditability.**
 
 Some natural follow-up questions are:
 
@@ -419,7 +419,7 @@ Some natural follow-up questions are:
 - How does the risk policy work?
 - What happens if Claude returns an invalid action?
 - Why do we need verification after remediation?
-- Why PostgreSQL for the audit trail?
+- Why MySQL for the audit trail?
 - How is this different from the original rule-based FinOps optimizer?
 
 ---
@@ -464,7 +464,7 @@ It does not try to build a production-grade autonomous Kubernetes controller. Th
                        ↓
                     AUDIT
                        ↓
-                  PostgreSQL
+                  MySQL
 ```
 
 **The core idea is simple: don't let AI directly control the cluster. Let AI recommend, let Python decide what is safe, let predefined tools perform the action, and always verify the result.**
