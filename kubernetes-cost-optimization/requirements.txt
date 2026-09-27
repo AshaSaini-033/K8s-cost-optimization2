@@ -3,4 +3,4 @@ requests
 langchain
 langchain-anthropic
 langgraph
-psycopg2-binary
+mysql-connector-python
